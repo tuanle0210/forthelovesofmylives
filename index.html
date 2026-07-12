@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For the Loves of My Lives</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff4d94, #4d0033);
+      color: white;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    img {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      margin: 20px 0;
+    }
+    h1 {
+      margin: 10px 0 5px;
+      font-size: 1.8em;
+    }
+    audio {
+      width: 100%;
+      margin: 20px 0;
+    }
+    .tracklist {
+      text-align: left;
+      background: rgba(0,0,0,0.3);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .track {
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 4px 0;
+    }
+    .track:hover, .track.playing {
+      background: rgba(255,255,255,0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Ảnh bìa đã sửa -->
+    <img src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
+
+    <h1>For the Loves of My Lives</h1>
+    <p>Tuan Le</p>
+
+    <audio id="audioPlayer" controls></audio>
+
+    <div class="tracklist">
+      <h2>Tracklist</h2>
+      <div id="tracks"></div>
+    </div>
+  </div>
+
+  <script>
+    const tracks = [
+      {title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download"},
+      {title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download"},
+      {title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download"},
+      {title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download"}
+    ];
+
+    const player = document.getElementById('audioPlayer');
+    const trackList = document.getElementById('tracks');
+    let currentTrack = 0;
+
+    tracks.forEach((track, index) => {
+      const div = document.createElement('div');
+      div.className = 'track';
+      div.textContent = track.title;
+      div.onclick = () => playTrack(index);
+      trackList.appendChild(div);
+    });
+
+    function playTrack(index) {
+      currentTrack = index;
+      player.src = tracks[index].src;
+      player.play();
+      
+      document.querySelectorAll('.track').forEach((el, i) => {
+        el.classList.toggle('playing', i === index);
+      });
+    }
+
+    player.addEventListener('ended', () => {
+      currentTrack = (currentTrack + 1) % tracks.length;
+      playTrack(currentTrack);
+    });
+
+    window.onload = () => {
+      playTrack(0);
+      player.pause();
+    };
+  </script>
+</body>
+</html>
