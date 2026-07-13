@@ -102,6 +102,16 @@
     .footer { margin-top: 40px; padding: 20px; font-size: 0.9em; opacity: 0.85; }
     .social-links a { color: var(--text); font-size: 1.6em; margin: 0 12px; transition: 0.3s; }
     .social-links a:hover { color: var(--accent); transform: translateY(-3px); }
+
+    .error-msg {
+      display: none;
+      background: rgba(255,60,60,0.25);
+      border: 1px solid rgba(255,60,60,0.6);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin: 10px 0;
+      font-size: 0.85em;
+    }
   </style>
 </head>
 <body data-theme="dark">
@@ -116,9 +126,11 @@
     <p>Tuan Le</p>
 
  <div class="custom-controls">
-  <audio id="audioPlayer"></audio>
+  <audio id="audioPlayer" crossorigin="anonymous"></audio>
   <canvas id="visualizer"></canvas>
-  
+
+  <div class="error-msg" id="errorMsg">⚠️ Không tải được bài hát, vui lòng thử lại.</div>
+
   <div class="progress-container">
     <progress id="progressBar" value="0" max="100"></progress>
     <div class="time">
@@ -161,11 +173,13 @@
   </div>
 
   <script>
+    const BASE = "https://cdn.jsdelivr.net/gh/tuanle0210/album-audio@main/";
+
     const tracks = [
-      { title: "01. Intro", src: "https://files.catbox.moe/xgd20m.mp3", lyrics: "(Instrumental)", duration: "1:12" },
-      { title: "02. Be Free", src: "https://files.catbox.moe/1ck0gu.mp3", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\n...", duration: "3:45" },
-      { title: "03. Mèo Đi Heels", src: "https://files.catbox.moe/hye3vk.mp3", lyrics: "Ngày ngủ còn đêm chơi\n...", duration: "4:28" },
-      { title: "04. A Tension Lover", src: "https://files.catbox.moe/1ucp53.mp3", lyrics: "We’ve been down this road\n...", duration: "3:52" }
+      { title: "01. Intro", src: BASE + "01%20INTRO_MASTER_MP3_320.mp3", lyrics: "(Instrumental)", duration: "1:12" },
+      { title: "02. Be Free", src: BASE + "02%20BE%20FREE_MASTER_MP3_320%20(1).mp3", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\n...", duration: "3:45" },
+      { title: "03. Mèo Đi Heels", src: BASE + "03%20MEO%20DI%20HEELS_MASTER_MP3_320%20(2).mp3", lyrics: "Ngày ngủ còn đêm chơi\n...", duration: "4:28" },
+      { title: "04. A Tension Lover", src: BASE + "04%20TENSION_MASTER_MP3_320%20(1).mp3", lyrics: "We've been down this road\n...", duration: "3:52" }
     ];
 
     const player = document.getElementById('audioPlayer');
@@ -179,9 +193,11 @@
     const volumeSlider = document.getElementById('volumeSlider');
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
+    const errorMsg = document.getElementById('errorMsg');
 
     let currentTrack = 0;
     let audioContext, analyser, source, animationFrame;
+    let userInteracted = false;
 
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
@@ -193,12 +209,16 @@
 
     function initVisualizer() {
       if (audioContext) return;
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 128;
-      source = audioContext.createMediaElementSource(player);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 128;
+        source = audioContext.createMediaElementSource(player);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+      } catch (e) {
+        console.warn("Visualizer không khởi tạo được:", e);
+      }
     }
 
     function drawVisualizer() {
@@ -222,16 +242,22 @@
     function playTrack(index) {
       currentTrack = index;
       player.src = tracks[index].src;
-      
+      errorMsg.style.display = 'none';
+
       albumArt.style.transform = 'scale(0.95)';
       lyricsDisplay.style.opacity = '0';
 
       setTimeout(() => {
-        player.play();
-        albumArt.style.transform = 'scale(1.05)';
-        lyricsDisplay.style.opacity = '1';
-        initVisualizer();
-        drawVisualizer();
+        player.play().then(() => {
+          playPauseBtn.textContent = '❚❚';
+          albumArt.style.transform = 'scale(1.05)';
+          lyricsDisplay.style.opacity = '1';
+          initVisualizer();
+          drawVisualizer();
+        }).catch(err => {
+          console.warn("Không phát được:", err);
+          if (userInteracted) errorMsg.style.display = 'block';
+        });
       }, 150);
 
       document.querySelectorAll('.track').forEach((el, i) => el.classList.toggle('playing', i === index));
@@ -239,11 +265,16 @@
     }
 
     function togglePlay() {
+      userInteracted = true;
       if (player.paused) {
-        player.play();
-        playPauseBtn.textContent = '❚❚';
-        initVisualizer();
-        drawVisualizer();
+        player.play().then(() => {
+          playPauseBtn.textContent = '❚❚';
+          initVisualizer();
+          drawVisualizer();
+        }).catch(err => {
+          console.warn("Không phát được:", err);
+          errorMsg.style.display = 'block';
+        });
       } else {
         player.pause();
         playPauseBtn.textContent = '▶';
@@ -253,6 +284,10 @@
 
     function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
     function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
+
+    player.addEventListener('error', () => {
+      errorMsg.style.display = 'block';
+    });
 
     player.addEventListener('timeupdate', () => {
       if (player.duration) {
@@ -285,8 +320,10 @@
     }
 
     window.onload = () => {
-      playTrack(0);
-      player.pause();
+      currentTrack = 0;
+      player.src = tracks[0].src;
+      lyricsDisplay.textContent = tracks[0].lyrics;
+      document.querySelectorAll('.track')[0].classList.add('playing');
       playPauseBtn.textContent = '▶';
       canvas.width = 400;
       canvas.height = 70;
