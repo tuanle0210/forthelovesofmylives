@@ -1,60 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>For the Loves of My Lives</title>
-  <style>
-    :root {
-      --bg-color: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-      --accent: #ff4d94;
-      --text: #ffffff;
-      --card: rgba(0,0,0,0.6);
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Arial', sans-serif;
-      color: var(--text);
-      min-height: 100vh;
-      text-align: center;
-      background: var(--bg-color),
-                  url('https://i.ibb.co/ccfxb6yZ/Gemini-Generated-Image-ydb0ysydb0ysydb0-s-a.png') center/cover no-repeat fixed;
-    }
-    .container { max-width: 460px; margin: 0 auto; padding: 20px 15px; }
-    img#albumArt { width: 100%; max-width: 340px; border-radius: 24px; margin: 15px 0; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-    .custom-controls { background: var(--card); padding: 20px; border-radius: 20px; margin: 20px 0; }
-    canvas#visualizer { width: 100%; height: 70px; border-radius: 12px; background: rgba(0,0,0,0.4); }
-    button { background: rgba(255,255,255,0.15); border: none; color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 1.6em; margin: 0 10px; cursor: pointer; }
-    #playPauseBtn { background: var(--accent); width: 70px; height: 70px; font-size: 1.9em; }
-    .track { padding: 14px; margin: 6px 0; border-radius: 12px; background: var(--card); display: flex; justify-content: space-between; cursor: pointer; }
-    .track.playing { background: #ff4d94; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <img id="albumArt" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
-    <h1>For the Loves of My Lives</h1>
-    <p>Tuan Le</p>
-
-    <div class="custom-controls">
-      <audio id="audioPlayer"></audio>
-      <canvas id="visualizer"></canvas>
-      
-      <div style="margin:15px 0;">
-        <button onclick="prevTrack()">⤆</button>
-        <button id="playPauseBtn" onclick="togglePlay()">▶</button>
-        <button onclick="nextTrack()">⤇</button>
-      </div>
-    </div>
-
-    <div style="background:var(--card); padding:15px; border-radius:20px; margin-top:20px; text-align:left;">
-      <h2>Tracklist</h2>
-      <div id="tracks"></div>
-    </div>
-  </div>
-
-  <script>
+<script>
     const tracks = [
       { title: "01. Intro", src: "https://files.catbox.moe/xgd20m.mp3" },
       { title: "02. Be Free", src: "https://files.catbox.moe/1ck0gu.mp3" },
@@ -63,30 +7,36 @@
     ];
 
     const player = document.getElementById('audioPlayer');
-    const canvas = document.getElementById('visualizer');
-    const ctx = canvas.getContext('2d');
     let currentTrack = 0;
-    let audioContext, analyser, animationFrame;
 
+    // Render tracklist
+    const trackList = document.getElementById('tracks');
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
       div.className = 'track';
-      div.textContent = track.title;
+      div.innerHTML = `<span>${track.title}</span><span class="track-duration">3:45</span>`;
       div.onclick = () => playTrack(index);
-      document.getElementById('tracks').appendChild(div);
+      trackList.appendChild(div);
     });
 
     function playTrack(index) {
       currentTrack = index;
       player.src = tracks[index].src;
-      player.play();
-      document.querySelectorAll('.track').forEach((el, i) => el.classList.toggle('playing', i === index));
+      player.play().catch(e => console.log("Play error:", e));
+      
+      document.querySelectorAll('.track').forEach((el, i) => {
+        el.classList.toggle('playing', i === index);
+      });
     }
 
     function togglePlay() {
-      if (player.paused) player.play();
-      else player.pause();
-      document.getElementById('playPauseBtn').textContent = player.paused ? '▶' : '❚❚';
+      if (player.paused) {
+        player.play();
+        document.getElementById('playPauseBtn').textContent = '❚❚';
+      } else {
+        player.pause();
+        document.getElementById('playPauseBtn').textContent = '▶';
+      }
     }
 
     function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
@@ -94,12 +44,8 @@
 
     player.addEventListener('ended', nextTrack);
 
+    // Khởi tạo
     window.onload = () => {
-      canvas.width = 400;
-      canvas.height = 70;
-      playTrack(0);
-      player.pause();
+      document.getElementById('playPauseBtn').textContent = '▶';
     };
   </script>
-</body>
-</html>
