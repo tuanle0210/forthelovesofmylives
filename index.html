@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg-color: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-      --accent-rgb: 255, 77, 148;
+      --accent-rgb: 147, 29, 56;
       --accent: rgb(var(--accent-rgb));
       --text: #ffffff;
       --card: rgba(0,0,0,0.55);
@@ -301,7 +301,7 @@
     // repeatMode: 0 = off, 1 = repeat all album, 2 = repeat current track
     let isShuffle = false;
     let repeatMode = 0;
-    let shuffleHistory = []; // để prevTrack hoạt động hợp lý khi đang shuffle
+    let shuffleHistory = [];
 
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
@@ -453,7 +453,7 @@
     }
 
     function nextTrack() {
-      if (repeatMode === 2) { // lặp lại đúng bài hiện tại
+      if (repeatMode === 2) {
         playTrack(currentTrack);
         return;
       }
@@ -463,7 +463,7 @@
 
     function prevTrack() {
       if (isShuffle && shuffleHistory.length > 1) {
-        shuffleHistory.pop(); // bỏ bài hiện tại
+        shuffleHistory.pop();
         const prev = shuffleHistory.pop();
         playTrack(prev);
         return;
@@ -503,9 +503,7 @@
     });
 
     player.addEventListener('ended', () => {
-      // Nếu repeat "cả album" và đây là bài cuối, hoặc repeat 1 bài, hoặc còn bài tiếp theo -> nextTrack lo hết
       if (repeatMode === 0 && !isShuffle && currentTrack === tracks.length - 1) {
-        // Hết album, không lặp -> dừng lại ở bài cuối
         playPauseBtn.textContent = '▶';
         miniPlayBtn.textContent = '▶';
         cancelAnimationFrame(animationFrame);
@@ -529,11 +527,10 @@
       document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
     }
 
-    // ==== Màu accent tự động lấy từ ảnh album ====
     function extractAccentColor(img) {
       try {
         const sampleCanvas = document.createElement('canvas');
-        const size = 50; // resize nhỏ để lấy mẫu nhanh
+        const size = 50;
         sampleCanvas.width = size;
         sampleCanvas.height = size;
         const sctx = sampleCanvas.getContext('2d');
@@ -551,7 +548,6 @@
           const lightness = (max + min) / 2;
           const sat = max === min ? 0 : (max - min) / (255 - Math.abs(2 * lightness - 255));
 
-          // Bỏ qua các pixel quá tối hoặc quá sáng (đen/trắng) để tránh màu accent nhạt nhòa
           if (lightness > 25 && lightness < 230) {
             r += pr; g += pg; b += pb; count++;
             if (sat > bestSaturation) {
@@ -563,14 +559,13 @@
 
         let finalR, finalG, finalB;
         if (bestSaturation > 0.15) {
-          // Ưu tiên màu có độ bão hòa cao nhất tìm được (giống Spotify)
           finalR = bestR; finalG = bestG; finalB = bestB;
         } else if (count > 0) {
           finalR = Math.round(r / count);
           finalG = Math.round(g / count);
           finalB = Math.round(b / count);
         } else {
-          return; // giữ màu mặc định
+          return;
         }
 
         document.documentElement.style.setProperty('--accent-rgb', `${finalR}, ${finalG}, ${finalB}`);
@@ -592,14 +587,8 @@
 
       setupMediaSessionHandlers();
       updateMediaSession(0);
-
-      // Đã tắt tính năng tự lấy màu từ ảnh bìa theo yêu cầu — giữ màu hồng cố định.
-      // Muốn bật lại thì bỏ comment 2 dòng dưới:
-      // if (albumArt.complete) { extractAccentColor(albumArt); }
-      // else { albumArt.addEventListener('load', () => extractAccentColor(albumArt)); }
     };
 
-    // ==== Sticky mini-player: hiện khi cuộn qua khỏi khu vực điều khiển chính ====
     window.addEventListener('scroll', () => {
       const rect = customControls.getBoundingClientRect();
       const shouldShow = rect.bottom < 0;
