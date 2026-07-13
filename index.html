@@ -1,51 +1,296 @@
-<script>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For the Loves of My Lives</title>
+  <style>
+    :root {
+      --bg-color: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9));
+      --accent: #ff4d94;
+      --text: #ffffff;
+      --card: rgba(0,0,0,0.55);
+    }
+    [data-theme="light"] {
+      --bg-color: linear-gradient(rgba(255,230,240,0.95), rgba(255,200,220,0.98));
+      --accent: #e91e63;
+      --text: #2d0a1f;
+      --card: rgba(255,255,255,0.9);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      text-align: center;
+      background: var(--bg-color),
+                  url('https://i.ibb.co/ccfxb6yZ/Gemini-Generated-Image-ydb0ysydb0ysydb0-s-a.png') center/cover no-repeat fixed;
+      transition: background 0.5s;
+    }
+    .container { max-width: 460px; margin: 0 auto; padding: 20px 15px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .theme-toggle {
+      background: rgba(0,0,0,0.3);
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      font-size: 1.4em;
+      cursor: pointer;
+      color: white;
+    }
+    [data-theme="light"] .theme-toggle { background: rgba(255,255,255,0.7); color: #2d0a1f; }
+
+    img#albumArt {
+      width: 100%;
+      max-width: 340px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      margin: 15px 0;
+      transition: transform 0.6s ease;
+    }
+
+    .custom-controls {
+      background: var(--card);
+      padding: 18px;
+      border-radius: 20px;
+      margin: 20px 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    canvas#visualizer { width: 100%; height: 70px; margin: 10px 0; border-radius: 12px; background: rgba(0,0,0,0.4); }
+    .progress-container, .volume-container { margin: 12px 0; }
+    progress, input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .buttons { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; }
+    button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: var(--text);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover { transform: scale(1.1); }
+    #playPauseBtn { background: var(--accent); width: 68px; height: 68px; font-size: 1.8em; }
+
+    .tracklist, .lyrics {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 18px;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .track {
+      padding: 14px;
+      cursor: pointer;
+      border-radius: 12px;
+      margin: 6px 0;
+      transition: 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .track:hover, .track.playing { background: rgba(255,77,148,0.4); }
+    .track-duration { font-size: 0.85em; opacity: 0.7; }
+
+    .lyrics { min-height: 220px; line-height: 1.75; white-space: pre-line; transition: opacity 0.4s ease; font-size: 0.96em; }
+
+    .footer { margin-top: 40px; padding: 20px; font-size: 0.9em; opacity: 0.85; }
+    .social-links a { color: var(--text); font-size: 1.6em; margin: 0 12px; transition: 0.3s; }
+    .social-links a:hover { color: var(--accent); transform: translateY(-3px); }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    <div class="header">
+      <div></div>
+      <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+    </div>
+
+    <img id="albumArt" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
+    <h1>For the Loves of My Lives</h1>
+    <p>Tuan Le</p>
+
+    <div class="custom-controls">
+      <audio id="audioPlayer"></audio>
+      <canvas id="visualizer"></canvas>
+      
+      <div class="progress-container">
+        <progress id="progressBar" value="0" max="100"></progress>
+        <div class="time">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button onclick="prevTrack()">⤆</button>
+        <button id="playPauseBtn" onclick="togglePlay()">▶</button>
+        <button onclick="nextTrack()">⤇</button>
+      </div>
+
+      <div class="volume-container">
+        <div class="volume-label">
+          <span>🔊</span>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="tracklist">
+      <h2>Tracklist</h2>
+      <div id="tracks"></div>
+    </div>
+
+    <div class="lyrics" id="lyricsDisplay">
+      Chọn một bài hát để xem lời...
+    </div>
+
+    <div class="footer">
+      <p><strong>Tuan Le</strong> • For the Loves of My Lives</p>
+      <div class="social-links">
+        <a href="https://facebook.com/tuanleftu" target="_blank">📘</a>
+        <a href="https://instagram.com/tbob.ins" target="_blank">📷</a>
+      </div>
+      <p style="margin-top: 15px; font-size: 0.8em;">© 2026 Tuan Le</p>
+    </div>
+  </div>
+
+  <script>
     const tracks = [
-      { title: "01. Intro", src: "https://files.catbox.moe/xgd20m.mp3" },
-      { title: "02. Be Free", src: "https://files.catbox.moe/1ck0gu.mp3" },
-      { title: "03. Mèo Đi Heels", src: "https://files.catbox.moe/hye3vk.mp3" },
-      { title: "04. A Tension Lover", src: "https://files.catbox.moe/1ucp53.mp3" }
+      { title: "01. Intro", src: "https://files.catbox.moe/xgd20m.mp3", lyrics: "(Instrumental)", duration: "1:12" },
+      { title: "02. Be Free", src: "https://files.catbox.moe/1ck0gu.mp3", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\n...", duration: "3:45" },
+      { title: "03. Mèo Đi Heels", src: "https://files.catbox.moe/hye3vk.mp3", lyrics: "Ngày ngủ còn đêm chơi\n...", duration: "4:28" },
+      { title: "04. A Tension Lover", src: "https://files.catbox.moe/1ucp53.mp3", lyrics: "We’ve been down this road\n...", duration: "3:52" }
     ];
 
     const player = document.getElementById('audioPlayer');
-    let currentTrack = 0;
-
-    // Render tracklist
+    const albumArt = document.getElementById('albumArt');
     const trackList = document.getElementById('tracks');
+    const lyricsDisplay = document.getElementById('lyricsDisplay');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const canvas = document.getElementById('visualizer');
+    const ctx = canvas.getContext('2d');
+
+    let currentTrack = 0;
+    let audioContext, analyser, source, animationFrame;
+
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
       div.className = 'track';
-      div.innerHTML = `<span>${track.title}</span><span class="track-duration">3:45</span>`;
+      div.innerHTML = `<span>${track.title}</span><span class="track-duration">${track.duration}</span>`;
       div.onclick = () => playTrack(index);
       trackList.appendChild(div);
     });
 
+    function initVisualizer() {
+      if (audioContext) return;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 128;
+      source = audioContext.createMediaElementSource(player);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+    }
+
+    function drawVisualizer() {
+      if (!analyser) return;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteFrequencyData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+        ctx.fillStyle = '#ff4d94';
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 2;
+      }
+      animationFrame = requestAnimationFrame(drawVisualizer);
+    }
+
     function playTrack(index) {
       currentTrack = index;
       player.src = tracks[index].src;
-      player.play().catch(e => console.log("Play error:", e));
       
-      document.querySelectorAll('.track').forEach((el, i) => {
-        el.classList.toggle('playing', i === index);
-      });
+      albumArt.style.transform = 'scale(0.95)';
+      lyricsDisplay.style.opacity = '0';
+
+      setTimeout(() => {
+        player.play();
+        albumArt.style.transform = 'scale(1.05)';
+        lyricsDisplay.style.opacity = '1';
+        initVisualizer();
+        drawVisualizer();
+      }, 150);
+
+      document.querySelectorAll('.track').forEach((el, i) => el.classList.toggle('playing', i === index));
+      lyricsDisplay.textContent = tracks[index].lyrics;
     }
 
     function togglePlay() {
       if (player.paused) {
         player.play();
-        document.getElementById('playPauseBtn').textContent = '❚❚';
+        playPauseBtn.textContent = '❚❚';
+        initVisualizer();
+        drawVisualizer();
       } else {
         player.pause();
-        document.getElementById('playPauseBtn').textContent = '▶';
+        playPauseBtn.textContent = '▶';
+        cancelAnimationFrame(animationFrame);
       }
     }
 
     function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
     function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
 
-    player.addEventListener('ended', nextTrack);
+    player.addEventListener('timeupdate', () => {
+      if (player.duration) {
+        progressBar.value = (player.currentTime / player.duration) * 100;
+        currentTimeEl.textContent = formatTime(player.currentTime);
+        durationEl.textContent = formatTime(player.duration);
+      }
+    });
 
-    // Khởi tạo
+    progressBar.addEventListener('click', (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      player.currentTime = pos * player.duration;
+    });
+
+    player.addEventListener('ended', nextTrack);
+    volumeSlider.addEventListener('input', () => player.volume = volumeSlider.value);
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isLight = body.getAttribute('data-theme') === 'light';
+      body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
+    }
+
     window.onload = () => {
-      document.getElementById('playPauseBtn').textContent = '▶';
+      playTrack(0);
+      player.pause();
+      playPauseBtn.textContent = '▶';
+      canvas.width = 400;
+      canvas.height = 70;
     };
   </script>
+</body>
+</html>
