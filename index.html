@@ -232,10 +232,30 @@
 
   <script>
     const tracks = [
-      { title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download", lyrics: "(Instrumental)", duration: "1:12" },
-      { title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nPick up the phone\nSay something clever\nI’m heading to your place, no pressure\n\nLet’s get far away\n‘Cause I don’t know how to shake this fever\nOnly your love can make me stronger\n\nLift me up, but don’t let me down\nTake my hands, don’t let them drown, just stay\n\nI’m going faster while I’m getting higher\nFeeling nauseous when the pills kicked in\n\nTell me, baby, are you free this Saturday night?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nOh oh I did it again\nI crossed the line that we can’t define and\n\nI know that you wanna take it slow\nbut I’m burning just to know how to make you feel and fall in love\n\nPromise that I will do it nonstop so just let me prove it\nI wanna make it clear so just quit fucking around\n\nGod I’m still falling into all these mixed feelings\nGuess I love the way you keep me guessing\n\nTell me, baby, are you free this Sunday morning?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\n‘Cause I just want your love\nEvery inch of your skin, every breath that you take\nJust give it all to me\nAnd then let your mind be free", duration: "3:45" },
-      { title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download", lyrics: "Ngày ngủ còn đêm chơi\n...", duration: "4:28" },
-      { title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download", lyrics: "We’ve been down this road\n...", duration: "3:52" }
+      { 
+        title: "01. Intro", 
+        src: "https://github.com/tuanle0210/album-audio/raw/refs/heads/main/01%20INTRO_MASTER_MP3_320.mp3", 
+        lyrics: "(Instrumental)", 
+        duration: "1:12" 
+      },
+      { 
+        title: "02. Be Free", 
+        src: "https://github.com/tuanle0210/album-audio/raw/refs/heads/main/02%20BE%20FREE_MASTER_MP3_320%20(1).mp3", 
+        lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nPick up the phone\nSay something clever\nI’m heading to your place, no pressure\n\nLet’s get far away\n‘Cause I don’t know how to shake this fever\nOnly your love can make me stronger\n\nLift me up, but don’t let me down\nTake my hands, don’t let them drown, just stay\n\nI’m going faster while I’m getting higher\nFeeling nauseous when the pills kicked in\n\nTell me, baby, are you free this Saturday night?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nOh oh I did it again\nI crossed the line that we can’t define and\n\nI know that you wanna take it slow\nbut I’m burning just to know how to make you feel and fall in love\n\nPromise that I will do it nonstop so just let me prove it\nI wanna make it clear so just quit fucking around\n\nGod I’m still falling into all these mixed feelings\nGuess I love the way you keep me guessing\n\nTell me, baby, are you free this Sunday morning?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\n‘Cause I just want your love\nEvery inch of your skin, every breath that you take\nJust give it all to me\nAnd then let your mind be free", 
+        duration: "3:45" 
+      },
+      { 
+        title: "03. Mèo Đi Heels", 
+        src: "https://github.com/tuanle0210/album-audio/raw/refs/heads/main/03%20MEO%20DI%20HEELS_MASTER_MP3_320%20(2).mp3", 
+        lyrics: "Ngày ngủ còn đêm chơi\n...", 
+        duration: "4:28" 
+      },
+      { 
+        title: "04. A Tension Lover", 
+        src: "https://github.com/tuanle0210/album-audio/raw/refs/heads/main/04%20TENSION_MASTER_MP3_320%20(1).mp3", 
+        lyrics: "We’ve been down this road\n...", 
+        duration: "3:52" 
+      }
     ];
 
     const player = document.getElementById('audioPlayer');
@@ -253,14 +273,10 @@
     let currentTrack = 0;
     let audioContext, analyser, source, animationFrame;
 
-    // Render tracklist with duration
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
       div.className = 'track';
-      div.innerHTML = `
-        <span>${track.title}</span>
-        <span class="track-duration">${track.duration}</span>
-      `;
+      div.innerHTML = `<span>${track.title}</span><span class="track-duration">${track.duration}</span>`;
       div.onclick = () => playTrack(index);
       trackList.appendChild(div);
     });
@@ -287,7 +303,7 @@
 
       for (let i = 0; i < bufferLength; i++) {
         const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
-        ctx.fillStyle = 'rgba(255, 77, 148, 0.9)';
+        ctx.fillStyle = '#ff4d94';
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 2;
       }
@@ -309,10 +325,7 @@
         drawVisualizer();
       }, 150);
 
-      document.querySelectorAll('.track').forEach((el, i) => {
-        el.classList.toggle('playing', i === index);
-      });
-
+      document.querySelectorAll('.track').forEach((el, i) => el.classList.toggle('playing', i === index));
       lyricsDisplay.textContent = tracks[index].lyrics;
     }
 
@@ -332,7 +345,6 @@
     function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
     function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
 
-    // Progress
     player.addEventListener('timeupdate', () => {
       if (player.duration) {
         progressBar.value = (player.currentTime / player.duration) * 100;
@@ -348,7 +360,6 @@
     });
 
     player.addEventListener('ended', nextTrack);
-
     volumeSlider.addEventListener('input', () => player.volume = volumeSlider.value);
 
     function formatTime(seconds) {
