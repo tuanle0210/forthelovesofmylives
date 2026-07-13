@@ -593,11 +593,10 @@
       setupMediaSessionHandlers();
       updateMediaSession(0);
 
-      if (albumArt.complete) {
-        extractAccentColor(albumArt);
-      } else {
-        albumArt.addEventListener('load', () => extractAccentColor(albumArt));
-      }
+      // Đã tắt tính năng tự lấy màu từ ảnh bìa theo yêu cầu — giữ màu hồng cố định.
+      // Muốn bật lại thì bỏ comment 2 dòng dưới:
+      // if (albumArt.complete) { extractAccentColor(albumArt); }
+      // else { albumArt.addEventListener('load', () => extractAccentColor(albumArt)); }
     };
 
     // ==== Sticky mini-player: hiện khi cuộn qua khỏi khu vực điều khiển chính ====
