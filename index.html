@@ -75,6 +75,15 @@
       margin: 20px 0;
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
+
+    canvas#visualizer {
+      width: 100%;
+      height: 60px;
+      margin: 10px 0;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.3);
+    }
+
     .progress-container, .volume-container {
       margin: 12px 0;
     }
@@ -127,9 +136,16 @@
       border-radius: 12px;
       margin: 6px 0;
       transition: 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .track:hover, .track.playing {
       background: rgba(255,77,148,0.4);
+    }
+    .track-duration {
+      font-size: 0.85em;
+      opacity: 0.7;
     }
 
     .lyrics {
@@ -171,6 +187,7 @@
 
     <div class="custom-controls">
       <audio id="audioPlayer"></audio>
+      <canvas id="visualizer"></canvas>
       
       <div class="progress-container">
         <progress id="progressBar" value="0" max="100"></progress>
@@ -215,10 +232,10 @@
 
   <script>
     const tracks = [
-      { title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download", lyrics: "(Instrumental)" },
-      { title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nPick up the phone\nSay something clever\nI’m heading to your place, no pressure\n\nLet’s get far away\n‘Cause I don’t know how to shake this fever\nOnly your love can make me stronger\n\nLift me up, but don’t let me down\nTake my hands, don’t let them drown, just stay\n\nI’m going faster while I’m getting higher\nFeeling nauseous when the pills kicked in\n\nTell me, baby, are you free this Saturday night?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nOh oh I did it again\nI crossed the line that we can’t define and\n\nI know that you wanna take it slow\nbut I’m burning just to know how to make you feel and fall in love\n\nPromise that I will do it nonstop so just let me prove it\nI wanna make it clear so just quit fucking around\n\nGod I’m still falling into all these mixed feelings\nGuess I love the way you keep me guessing\n\nTell me, baby, are you free this Sunday morning?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\n‘Cause I just want your love\nEvery inch of your skin, every breath that you take\nJust give it all to me\nAnd then let your mind be free" },
-      { title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download", lyrics: "Ngày ngủ còn đêm chơi\nAi biết đâu được em phiêu du đây đó\nChẳng cần một ai đâu\nVì em luôn biết rằng em thật quý giá\n\nEm như là hoa ở trên cành\nBao nhiêu người thương cũng chẳng đành\nVì mai nay lỡ rồi em đi mất\n\nTôi mang thầm thương viết cho em\nĐêm đêm ngồi ca hát bên thềm\nDù cho tôi biết chẳng thể nào mà có em\n\nCho dù em biết anh yêu em nhưng thôi em vẫn cứ lặng thinh\nBao chuyện cỏn con, phai nhạt màu son, lem hết mi\n\nYêu thì yêu không yêu thì thôi dù sao cũng cách xa\nLỡ mai em đi về xa vời, có chăng đây chỉ còn lại mình anh?\n\nOkay em ơi nghe anh nói này\nCho anh một cơ hội để anh được giãi bày\n\nAnh biết em biết là anh không ý kiến\nNhưng mà xinh như thế sao em không có duyên?\n\nCứ quăng miếng chán chê rồi em đi mất\nAnh cứ ngồi trông ngóng cứ nghĩ em nói thật\n\nVài ba hôm quay lại em nói em nhớ anh nhất\nCơ mà sao anh vẫn tin em như thằng đần?\n\nHay tại em chỉ yêu người ít nói\nKhông cần nhiều lời chẳng cần thanh minh\n\nMỗi khi em buồn khi em giận dỗi\nLời xin lỗi họ gửi qua tin nhắn banking\n\nTin nhắn anh gửi em chưa bấm xem\nEm up thread hỏi bao nhiêu người đang nhớ em\n\nTình yêu không phải thế đâu em ơi\nĐây không phải gameshow Hiếu Thứ Hai còn lười chơi\n\nNgày ngủ bù cho đêm\nTôi vẫn cứ ngây dại đi theo em như thế\nDù biết em sẽ chẳng hề bận tâm\nNhưng sao tôi vẫn ấp ôm một mối tình\n\nBiết đâu em như là hoa ở trên cành\nBao nhiêu người thương cũng chẳng đành\nRồi buổi chiều hôm ấy chợt em đi mất\n\nTôi mang thầm thương viết cho em\nEm chưa đọc xong vứt quanh nhà\nVì em cũng biết tôi chẳng thể nào mà có em\n\nCho dù em biết anh yêu em nhưng thôi em vẫn cứ lặng thinh\nBao chuyện cỏn con, phai nhạt màu son, lem hết mi\n\nYêu thì yêu không yêu thì thôi dù sao cũng cách xa\nLỡ mai em đi về xa vời, có chăng đây chỉ còn lại mình anh?\n\nPhải chi anh đoán ra khi em ngang qua đây ngào ngạt mùi hương nước hoa\nGiày cao gót thướt tha đưa em đi qua bao nhiêu chuyện tình yêu thoáng qua" },
-      { title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download", lyrics: "We’ve been down this road\nAnd it’s getting old\nI don't wanna waste your time so please, listen\n\nI tested the flame\nAnd yes, I’m telling you\nWe’ve made up our minds since the last time\n\nSo don’t lay the wreck at my front door\nI know it hurts so good\n‘Cause I’ve experienced it before\n\nWhat we loved was the tension\nI let you stay the nights in my room\nBut I don’t want you to be mine\nI don’t want your attention\n\nI’m not the one to love\nYou don’t deserve to be alone\nGuess I should walk away from your life\n\nYou don’t have to stay\nI’ll find a way to fade away\nYou know it’s time that you decided\n\nWe made up our minds the last time\nSo you shouldn’t say it was my fault\nI can’t take the blame ‘cause you already knew that\n\nThe burns gonna be alright\nI know it hurts so good\n‘Cause I’ve experienced it before\n\nWhat we loved was the tension\nI let you stay the nights in my room\nBut I don’t want you to be mine\nI don’t want your attention" }
+      { title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download", lyrics: "(Instrumental)", duration: "1:12" },
+      { title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nPick up the phone\nSay something clever\nI’m heading to your place, no pressure\n\nLet’s get far away\n‘Cause I don’t know how to shake this fever\nOnly your love can make me stronger\n\nLift me up, but don’t let me down\nTake my hands, don’t let them drown, just stay\n\nI’m going faster while I’m getting higher\nFeeling nauseous when the pills kicked in\n\nTell me, baby, are you free this Saturday night?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nOh oh I did it again\nI crossed the line that we can’t define and\n\nI know that you wanna take it slow\nbut I’m burning just to know how to make you feel and fall in love\n\nPromise that I will do it nonstop so just let me prove it\nI wanna make it clear so just quit fucking around\n\nGod I’m still falling into all these mixed feelings\nGuess I love the way you keep me guessing\n\nTell me, baby, are you free this Sunday morning?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\n‘Cause I just want your love\nEvery inch of your skin, every breath that you take\nJust give it all to me\nAnd then let your mind be free", duration: "3:45" },
+      { title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download", lyrics: "Ngày ngủ còn đêm chơi\n...", duration: "4:28" },
+      { title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download", lyrics: "We’ve been down this road\n...", duration: "3:52" }
     ];
 
     const player = document.getElementById('audioPlayer');
@@ -230,16 +247,52 @@
     const durationEl = document.getElementById('duration');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const volumeSlider = document.getElementById('volumeSlider');
+    const canvas = document.getElementById('visualizer');
+    const ctx = canvas.getContext('2d');
 
     let currentTrack = 0;
+    let audioContext, analyser, source, animationFrame;
 
+    // Render tracklist with duration
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
       div.className = 'track';
-      div.textContent = track.title;
+      div.innerHTML = `
+        <span>${track.title}</span>
+        <span class="track-duration">${track.duration}</span>
+      `;
       div.onclick = () => playTrack(index);
       trackList.appendChild(div);
     });
+
+    function initVisualizer() {
+      if (audioContext) return;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 128;
+      source = audioContext.createMediaElementSource(player);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+    }
+
+    function drawVisualizer() {
+      if (!analyser) return;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteFrequencyData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+        ctx.fillStyle = 'rgba(255, 77, 148, 0.9)';
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 2;
+      }
+      animationFrame = requestAnimationFrame(drawVisualizer);
+    }
 
     function playTrack(index) {
       currentTrack = index;
@@ -252,6 +305,8 @@
         player.play();
         albumArt.style.transform = 'scale(1.05)';
         lyricsDisplay.style.opacity = '1';
+        initVisualizer();
+        drawVisualizer();
       }, 150);
 
       document.querySelectorAll('.track').forEach((el, i) => {
@@ -265,15 +320,19 @@
       if (player.paused) {
         player.play();
         playPauseBtn.textContent = '❚❚';
+        initVisualizer();
+        drawVisualizer();
       } else {
         player.pause();
         playPauseBtn.textContent = '▶';
+        cancelAnimationFrame(animationFrame);
       }
     }
 
     function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
     function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
 
+    // Progress
     player.addEventListener('timeupdate', () => {
       if (player.duration) {
         progressBar.value = (player.currentTime / player.duration) * 100;
@@ -290,9 +349,7 @@
 
     player.addEventListener('ended', nextTrack);
 
-    volumeSlider.addEventListener('input', () => {
-      player.volume = volumeSlider.value;
-    });
+    volumeSlider.addEventListener('input', () => player.volume = volumeSlider.value);
 
     function formatTime(seconds) {
       const min = Math.floor(seconds / 60);
@@ -311,6 +368,8 @@
       playTrack(0);
       player.pause();
       playPauseBtn.textContent = '▶';
+      canvas.width = 400;
+      canvas.height = 60;
     };
   </script>
 </body>
