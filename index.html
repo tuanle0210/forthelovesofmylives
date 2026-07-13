@@ -7,13 +7,13 @@
   <style>
     :root {
       --bg-color: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-      --accent: #ff4d94;
+      --accent-rgb: 255, 77, 148;
+      --accent: rgb(var(--accent-rgb));
       --text: #ffffff;
       --card: rgba(0,0,0,0.55);
     }
     [data-theme="light"] {
       --bg-color: linear-gradient(rgba(255,230,240,0.95), rgba(255,200,220,0.98));
-      --accent: #e91e63;
       --text: #2d0a1f;
       --card: rgba(255,255,255,0.9);
     }
@@ -28,6 +28,7 @@
       background: var(--bg-color),
                   url('https://i.ibb.co/ccfxb6yZ/Gemini-Generated-Image-ydb0ysydb0ysydb0-s-a.png') center/cover no-repeat fixed;
       transition: background 0.5s;
+      padding-bottom: 90px; /* chừa chỗ cho mini-player */
     }
     .container { max-width: 460px; margin: 0 auto; padding: 20px 15px; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -62,7 +63,7 @@
     canvas#visualizer { width: 100%; height: 70px; margin: 10px 0; border-radius: 12px; background: rgba(0,0,0,0.4); }
     .progress-container, .volume-container { margin: 12px 0; }
     progress, input[type="range"] { width: 100%; accent-color: var(--accent); }
-    .buttons { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; }
+    .buttons { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 15px 0; flex-wrap: wrap; }
     button {
       background: rgba(255,255,255,0.15);
       border: none;
@@ -76,6 +77,23 @@
     }
     button:hover { transform: scale(1.1); }
     #playPauseBtn { background: var(--accent); width: 68px; height: 68px; font-size: 1.8em; }
+
+    /* Shuffle & Repeat */
+    .mode-btn { width: 44px; height: 44px; font-size: 1.15em; position: relative; }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+    .mode-btn .repeat-one-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      font-size: 0.32em;
+      background: #fff;
+      color: var(--accent);
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      line-height: 15px;
+      font-weight: bold;
+    }
 
     .tracklist, .lyrics {
       background: var(--card);
@@ -94,7 +112,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .track:hover, .track.playing { background: rgba(255,77,148,0.4); }
+    .track:hover, .track.playing { background: rgba(var(--accent-rgb), 0.4); }
     .track-duration { font-size: 0.85em; opacity: 0.7; }
 
     .lyrics { min-height: 220px; line-height: 1.75; white-space: pre-line; transition: opacity 0.4s ease; font-size: 0.96em; }
@@ -112,6 +130,66 @@
       margin: 10px 0;
       font-size: 0.85em;
     }
+
+    /* Sticky mini-player */
+    .mini-player {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      padding: 10px 16px;
+      box-shadow: 0 -6px 20px rgba(0,0,0,0.4);
+      transform: translateY(110%);
+      transition: transform 0.35s ease;
+      z-index: 999;
+    }
+    .mini-player.show { transform: translateY(0); }
+    .mini-player img {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .mini-info {
+      flex: 1;
+      text-align: left;
+      overflow: hidden;
+    }
+    .mini-info .mini-title {
+      font-size: 0.9em;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-progress {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    .mini-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.2s linear;
+    }
+    .mini-player button {
+      width: 42px;
+      height: 42px;
+      font-size: 1.2em;
+      background: var(--accent);
+      color: #fff;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body data-theme="dark">
@@ -121,11 +199,11 @@
       <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
     </div>
 
-    <img id="albumArt" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
+    <img id="albumArt" crossorigin="anonymous" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
     <h1>For the Loves of My Lives</h1>
     <p>Tuan Le</p>
 
- <div class="custom-controls">
+ <div class="custom-controls" id="customControls">
   <audio id="audioPlayer" crossorigin="anonymous"></audio>
   <canvas id="visualizer"></canvas>
 
@@ -140,9 +218,11 @@
   </div>
 
   <div class="buttons">
+    <button class="mode-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Phát ngẫu nhiên">🔀</button>
     <button onclick="prevTrack()">⤆</button>
     <button id="playPauseBtn" onclick="togglePlay()">▶</button>
     <button onclick="nextTrack()">⤇</button>
+    <button class="mode-btn" id="repeatBtn" onclick="toggleRepeat()" title="Lặp lại">🔁</button>
   </div>
 
   <div class="volume-container">
@@ -172,6 +252,16 @@
     </div>
   </div>
 
+  <!-- Sticky mini-player -->
+  <div class="mini-player" id="miniPlayer">
+    <img id="miniArt" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Mini cover">
+    <div class="mini-info">
+      <div class="mini-title" id="miniTitle">01. Intro</div>
+      <div class="mini-progress"><div class="mini-progress-fill" id="miniProgressFill"></div></div>
+    </div>
+    <button id="miniPlayBtn" onclick="togglePlay()">▶</button>
+  </div>
+
   <script>
     const BASE = "https://cdn.jsdelivr.net/gh/tuanle0210/album-audio@main/";
 
@@ -194,10 +284,24 @@
     const canvas = document.getElementById('visualizer');
     const ctx = canvas.getContext('2d');
     const errorMsg = document.getElementById('errorMsg');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const customControls = document.getElementById('customControls');
+    const miniPlayer = document.getElementById('miniPlayer');
+    const miniArt = document.getElementById('miniArt');
+    const miniTitle = document.getElementById('miniTitle');
+    const miniPlayBtn = document.getElementById('miniPlayBtn');
+    const miniProgressFill = document.getElementById('miniProgressFill');
 
     let currentTrack = 0;
     let audioContext, analyser, source, animationFrame;
     let userInteracted = false;
+
+    // ==== Shuffle & Repeat state ====
+    // repeatMode: 0 = off, 1 = repeat all album, 2 = repeat current track
+    let isShuffle = false;
+    let repeatMode = 0;
+    let shuffleHistory = []; // để prevTrack hoạt động hợp lý khi đang shuffle
 
     tracks.forEach((track, index) => {
       const div = document.createElement('div');
@@ -206,6 +310,39 @@
       div.onclick = () => playTrack(index);
       trackList.appendChild(div);
     });
+
+    function toggleShuffle() {
+      isShuffle = !isShuffle;
+      shuffleBtn.classList.toggle('active', isShuffle);
+      shuffleHistory = [currentTrack];
+    }
+
+    function toggleRepeat() {
+      repeatMode = (repeatMode + 1) % 3;
+      repeatBtn.classList.remove('active');
+      const badge = repeatBtn.querySelector('.repeat-one-badge');
+      if (badge) badge.remove();
+
+      if (repeatMode === 1) {
+        repeatBtn.classList.add('active');
+      } else if (repeatMode === 2) {
+        repeatBtn.classList.add('active');
+        const span = document.createElement('span');
+        span.className = 'repeat-one-badge';
+        span.textContent = '1';
+        repeatBtn.appendChild(span);
+      }
+    }
+
+    function getNextIndex() {
+      if (isShuffle) {
+        if (tracks.length === 1) return 0;
+        let next;
+        do { next = Math.floor(Math.random() * tracks.length); } while (next === currentTrack);
+        return next;
+      }
+      return (currentTrack + 1) % tracks.length;
+    }
 
     function initVisualizer() {
       if (audioContext) return;
@@ -227,20 +364,48 @@
       const dataArray = new Uint8Array(bufferLength);
       analyser.getByteFrequencyData(dataArray);
 
+      const accentColor = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#ff4d94';
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const barWidth = (canvas.width / bufferLength) * 2.5;
       let x = 0;
       for (let i = 0; i < bufferLength; i++) {
         const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
-        ctx.fillStyle = '#ff4d94';
+        ctx.fillStyle = accentColor;
         ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth + 2;
       }
       animationFrame = requestAnimationFrame(drawVisualizer);
     }
 
+    function updateMediaSession(index) {
+      if (!('mediaSession' in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: tracks[index].title,
+        artist: 'Tuan Le',
+        album: 'For the Loves of My Lives',
+        artwork: [
+          { src: albumArt.src, sizes: '512x512', type: 'image/png' }
+        ]
+      });
+    }
+
+    function setupMediaSessionHandlers() {
+      if (!('mediaSession' in navigator)) return;
+      navigator.mediaSession.setActionHandler('play', () => togglePlay());
+      navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+      navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+      navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime !== undefined && player.duration) {
+          player.currentTime = details.seekTime;
+        }
+      });
+    }
+
     function playTrack(index) {
       currentTrack = index;
+      if (isShuffle) shuffleHistory.push(index);
       player.src = tracks[index].src;
       errorMsg.style.display = 'none';
 
@@ -250,6 +415,7 @@
       setTimeout(() => {
         player.play().then(() => {
           playPauseBtn.textContent = '❚❚';
+          miniPlayBtn.textContent = '❚❚';
           albumArt.style.transform = 'scale(1.05)';
           lyricsDisplay.style.opacity = '1';
           initVisualizer();
@@ -262,6 +428,8 @@
 
       document.querySelectorAll('.track').forEach((el, i) => el.classList.toggle('playing', i === index));
       lyricsDisplay.textContent = tracks[index].lyrics;
+      miniTitle.textContent = tracks[index].title;
+      updateMediaSession(index);
     }
 
     function togglePlay() {
@@ -269,6 +437,7 @@
       if (player.paused) {
         player.play().then(() => {
           playPauseBtn.textContent = '❚❚';
+          miniPlayBtn.textContent = '❚❚';
           initVisualizer();
           drawVisualizer();
         }).catch(err => {
@@ -278,12 +447,30 @@
       } else {
         player.pause();
         playPauseBtn.textContent = '▶';
+        miniPlayBtn.textContent = '▶';
         cancelAnimationFrame(animationFrame);
       }
     }
 
-    function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
-    function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
+    function nextTrack() {
+      if (repeatMode === 2) { // lặp lại đúng bài hiện tại
+        playTrack(currentTrack);
+        return;
+      }
+      currentTrack = getNextIndex();
+      playTrack(currentTrack);
+    }
+
+    function prevTrack() {
+      if (isShuffle && shuffleHistory.length > 1) {
+        shuffleHistory.pop(); // bỏ bài hiện tại
+        const prev = shuffleHistory.pop();
+        playTrack(prev);
+        return;
+      }
+      currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+      playTrack(currentTrack);
+    }
 
     player.addEventListener('error', () => {
       errorMsg.style.display = 'block';
@@ -291,9 +478,21 @@
 
     player.addEventListener('timeupdate', () => {
       if (player.duration) {
-        progressBar.value = (player.currentTime / player.duration) * 100;
+        const pct = (player.currentTime / player.duration) * 100;
+        progressBar.value = pct;
         currentTimeEl.textContent = formatTime(player.currentTime);
         durationEl.textContent = formatTime(player.duration);
+        miniProgressFill.style.width = pct + '%';
+
+        if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+          try {
+            navigator.mediaSession.setPositionState({
+              duration: player.duration,
+              playbackRate: player.playbackRate,
+              position: player.currentTime
+            });
+          } catch (e) {}
+        }
       }
     });
 
@@ -303,7 +502,18 @@
       player.currentTime = pos * player.duration;
     });
 
-    player.addEventListener('ended', nextTrack);
+    player.addEventListener('ended', () => {
+      // Nếu repeat "cả album" và đây là bài cuối, hoặc repeat 1 bài, hoặc còn bài tiếp theo -> nextTrack lo hết
+      if (repeatMode === 0 && !isShuffle && currentTrack === tracks.length - 1) {
+        // Hết album, không lặp -> dừng lại ở bài cuối
+        playPauseBtn.textContent = '▶';
+        miniPlayBtn.textContent = '▶';
+        cancelAnimationFrame(animationFrame);
+        return;
+      }
+      nextTrack();
+    });
+
     volumeSlider.addEventListener('input', () => player.volume = volumeSlider.value);
 
     function formatTime(seconds) {
@@ -319,15 +529,83 @@
       document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
     }
 
+    // ==== Màu accent tự động lấy từ ảnh album ====
+    function extractAccentColor(img) {
+      try {
+        const sampleCanvas = document.createElement('canvas');
+        const size = 50; // resize nhỏ để lấy mẫu nhanh
+        sampleCanvas.width = size;
+        sampleCanvas.height = size;
+        const sctx = sampleCanvas.getContext('2d');
+        sctx.drawImage(img, 0, 0, size, size);
+        const data = sctx.getImageData(0, 0, size, size).data;
+
+        let r = 0, g = 0, b = 0, count = 0;
+        let bestSaturation = -1, bestR = 255, bestG = 77, bestB = 148;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const pr = data[i], pg = data[i + 1], pb = data[i + 2], alpha = data[i + 3];
+          if (alpha < 100) continue;
+
+          const max = Math.max(pr, pg, pb), min = Math.min(pr, pg, pb);
+          const lightness = (max + min) / 2;
+          const sat = max === min ? 0 : (max - min) / (255 - Math.abs(2 * lightness - 255));
+
+          // Bỏ qua các pixel quá tối hoặc quá sáng (đen/trắng) để tránh màu accent nhạt nhòa
+          if (lightness > 25 && lightness < 230) {
+            r += pr; g += pg; b += pb; count++;
+            if (sat > bestSaturation) {
+              bestSaturation = sat;
+              bestR = pr; bestG = pg; bestB = pb;
+            }
+          }
+        }
+
+        let finalR, finalG, finalB;
+        if (bestSaturation > 0.15) {
+          // Ưu tiên màu có độ bão hòa cao nhất tìm được (giống Spotify)
+          finalR = bestR; finalG = bestG; finalB = bestB;
+        } else if (count > 0) {
+          finalR = Math.round(r / count);
+          finalG = Math.round(g / count);
+          finalB = Math.round(b / count);
+        } else {
+          return; // giữ màu mặc định
+        }
+
+        document.documentElement.style.setProperty('--accent-rgb', `${finalR}, ${finalG}, ${finalB}`);
+      } catch (e) {
+        console.warn("Không lấy được màu chủ đạo từ ảnh album (có thể do CORS):", e);
+      }
+    }
+
     window.onload = () => {
       currentTrack = 0;
       player.src = tracks[0].src;
       lyricsDisplay.textContent = tracks[0].lyrics;
       document.querySelectorAll('.track')[0].classList.add('playing');
       playPauseBtn.textContent = '▶';
+      miniTitle.textContent = tracks[0].title;
       canvas.width = 400;
       canvas.height = 70;
+      shuffleHistory = [0];
+
+      setupMediaSessionHandlers();
+      updateMediaSession(0);
+
+      if (albumArt.complete) {
+        extractAccentColor(albumArt);
+      } else {
+        albumArt.addEventListener('load', () => extractAccentColor(albumArt));
+      }
     };
+
+    // ==== Sticky mini-player: hiện khi cuộn qua khỏi khu vực điều khiển chính ====
+    window.addEventListener('scroll', () => {
+      const rect = customControls.getBoundingClientRect();
+      const shouldShow = rect.bottom < 0;
+      miniPlayer.classList.toggle('show', shouldShow);
+    });
   </script>
 </body>
 </html>
