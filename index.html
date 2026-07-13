@@ -5,79 +5,232 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>For the Loves of My Lives</title>
   <style>
+    :root {
+      --bg-color: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9));
+      --accent: #ff4d94;
+      --text: #ffffff;
+      --card: rgba(0,0,0,0.55);
+    }
+    [data-theme="light"] {
+      --bg-color: linear-gradient(rgba(255,230,240,0.95), rgba(255,200,220,0.98));
+      --accent: #e91e63;
+      --text: #2d0a1f;
+      --card: rgba(255,255,255,0.9);
+    }
+
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ff4d94, #4d0033);
-      color: white;
+      font-family: 'Arial', sans-serif;
+      color: var(--text);
       min-height: 100vh;
       text-align: center;
+      background: var(--bg-color),
+                  url('https://i.ibb.co/ccfxb6yZ/Gemini-Generated-Image-ydb0ysydb0ysydb0-s-a.png') center/cover no-repeat fixed;
+      transition: background 0.5s;
     }
     .container {
-      max-width: 420px;
+      max-width: 460px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 20px 15px;
     }
-    img {
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .theme-toggle {
+      background: rgba(0,0,0,0.3);
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      font-size: 1.4em;
+      cursor: pointer;
+      color: white;
+    }
+    [data-theme="light"] .theme-toggle {
+      background: rgba(255,255,255,0.7);
+      color: #2d0a1f;
+    }
+
+    img#albumArt {
       width: 100%;
-      max-width: 320px;
-      border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-      margin: 20px 0;
+      max-width: 340px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      margin: 15px 0;
+      transition: transform 0.6s ease;
     }
-    h1 {
-      margin: 10px 0 5px;
+
+    h1 { margin: 8px 0 5px; font-size: 1.85em; }
+    p { margin: 0; opacity: 0.9; }
+
+    .custom-controls {
+      background: var(--card);
+      padding: 18px;
+      border-radius: 20px;
+      margin: 20px 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .progress-container, .volume-container {
+      margin: 12px 0;
+    }
+    progress, input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .time, .volume-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9em;
+      margin: 6px 0;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: var(--text);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover { transform: scale(1.1); }
+    #playPauseBtn {
+      background: var(--accent);
+      width: 68px;
+      height: 68px;
       font-size: 1.8em;
     }
-    audio {
-      width: 100%;
-      margin: 20px 0;
-    }
-    .tracklist {
-      text-align: left;
-      background: rgba(0,0,0,0.3);
-      border-radius: 15px;
-      padding: 15px;
+
+    .tracklist, .lyrics {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 18px;
       margin-top: 20px;
+      text-align: left;
     }
     .track {
-      padding: 12px;
+      padding: 14px;
       cursor: pointer;
-      border-radius: 8px;
-      margin: 4px 0;
+      border-radius: 12px;
+      margin: 6px 0;
+      transition: 0.3s;
     }
     .track:hover, .track.playing {
-      background: rgba(255,255,255,0.25);
+      background: rgba(255,77,148,0.4);
+    }
+
+    .lyrics {
+      min-height: 220px;
+      line-height: 1.75;
+      white-space: pre-line;
+      transition: opacity 0.4s ease;
+      font-size: 0.96em;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding: 20px;
+      font-size: 0.9em;
+      opacity: 0.85;
+    }
+    .social-links a {
+      color: var(--text);
+      font-size: 1.6em;
+      margin: 0 12px;
+      transition: 0.3s;
+    }
+    .social-links a:hover {
+      color: var(--accent);
+      transform: translateY(-3px);
     }
   </style>
 </head>
-<body>
+<body data-theme="dark">
   <div class="container">
-    <!-- Ảnh bìa đã sửa -->
-    <img src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
+    <div class="header">
+      <div></div>
+      <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+    </div>
 
+    <img id="albumArt" src="https://i.ibb.co/Xx8J3Rcs/Page-1-Front-Cover.png" alt="Album Cover">
     <h1>For the Loves of My Lives</h1>
     <p>Tuan Le</p>
 
-    <audio id="audioPlayer" controls></audio>
+    <div class="custom-controls">
+      <audio id="audioPlayer"></audio>
+      
+      <div class="progress-container">
+        <progress id="progressBar" value="0" max="100"></progress>
+        <div class="time">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button onclick="prevTrack()">⤆</button>
+        <button id="playPauseBtn" onclick="togglePlay()">▶</button>
+        <button onclick="nextTrack()">⤇</button>
+      </div>
+
+      <div class="volume-container">
+        <div class="volume-label">
+          <span>🔊</span>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        </div>
+      </div>
+    </div>
 
     <div class="tracklist">
       <h2>Tracklist</h2>
       <div id="tracks"></div>
     </div>
+
+    <div class="lyrics" id="lyricsDisplay">
+      Chọn một bài hát để xem lời...
+    </div>
+
+    <div class="footer">
+      <p><strong>Tuan Le</strong> • For the Loves of My Lives</p>
+      <div class="social-links">
+        <a href="https://facebook.com/tuanleftu" target="_blank">📘</a>
+        <a href="https://instagram.com/tbob.ins" target="_blank">📷</a>
+      </div>
+      <p style="margin-top: 15px; font-size: 0.8em;">© 2026 Tuan Le</p>
+    </div>
   </div>
 
   <script>
     const tracks = [
-      {title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download"},
-      {title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download"},
-      {title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download"},
-      {title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download"}
+      { title: "01. Intro", src: "https://drive.google.com/uc?id=1SR3JF1VUrGr-FMwTBxFXyNN2-V3RK-k5&export=download", lyrics: "(Instrumental)" },
+      { title: "02. Be Free", src: "https://drive.google.com/uc?id=1JLg6Tkkui09hxtWkPhtEy77JhHpHDT82&export=download", lyrics: "You, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nPick up the phone\nSay something clever\nI’m heading to your place, no pressure\n\nLet’s get far away\n‘Cause I don’t know how to shake this fever\nOnly your love can make me stronger\n\nLift me up, but don’t let me down\nTake my hands, don’t let them drown, just stay\n\nI’m going faster while I’m getting higher\nFeeling nauseous when the pills kicked in\n\nTell me, baby, are you free this Saturday night?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nYou so pretty baby\n\nYou, you, you\nYou, you, you\nYou, you, you\nStuck inside my head\n\nOh Anna\nOh oh I did it again\nI crossed the line that we can’t define and\n\nI know that you wanna take it slow\nbut I’m burning just to know how to make you feel and fall in love\n\nPromise that I will do it nonstop so just let me prove it\nI wanna make it clear so just quit fucking around\n\nGod I’m still falling into all these mixed feelings\nGuess I love the way you keep me guessing\n\nTell me, baby, are you free this Sunday morning?\nGive me all you’ve got so I can stop thinking of you, oh baby\n\n‘Cause I just want your love\nEvery inch of your skin, every breath that you take\nJust give it all to me\nAnd then let your mind be free" },
+      { title: "03. Mèo Đi Heels", src: "https://drive.google.com/uc?id=1Lh2d5pvk5YMWMu4N3Z8GMjHm9I-rJzH_&export=download", lyrics: "Ngày ngủ còn đêm chơi\nAi biết đâu được em phiêu du đây đó\nChẳng cần một ai đâu\nVì em luôn biết rằng em thật quý giá\n\nEm như là hoa ở trên cành\nBao nhiêu người thương cũng chẳng đành\nVì mai nay lỡ rồi em đi mất\n\nTôi mang thầm thương viết cho em\nĐêm đêm ngồi ca hát bên thềm\nDù cho tôi biết chẳng thể nào mà có em\n\nCho dù em biết anh yêu em nhưng thôi em vẫn cứ lặng thinh\nBao chuyện cỏn con, phai nhạt màu son, lem hết mi\n\nYêu thì yêu không yêu thì thôi dù sao cũng cách xa\nLỡ mai em đi về xa vời, có chăng đây chỉ còn lại mình anh?\n\nOkay em ơi nghe anh nói này\nCho anh một cơ hội để anh được giãi bày\n\nAnh biết em biết là anh không ý kiến\nNhưng mà xinh như thế sao em không có duyên?\n\nCứ quăng miếng chán chê rồi em đi mất\nAnh cứ ngồi trông ngóng cứ nghĩ em nói thật\n\nVài ba hôm quay lại em nói em nhớ anh nhất\nCơ mà sao anh vẫn tin em như thằng đần?\n\nHay tại em chỉ yêu người ít nói\nKhông cần nhiều lời chẳng cần thanh minh\n\nMỗi khi em buồn khi em giận dỗi\nLời xin lỗi họ gửi qua tin nhắn banking\n\nTin nhắn anh gửi em chưa bấm xem\nEm up thread hỏi bao nhiêu người đang nhớ em\n\nTình yêu không phải thế đâu em ơi\nĐây không phải gameshow Hiếu Thứ Hai còn lười chơi\n\nNgày ngủ bù cho đêm\nTôi vẫn cứ ngây dại đi theo em như thế\nDù biết em sẽ chẳng hề bận tâm\nNhưng sao tôi vẫn ấp ôm một mối tình\n\nBiết đâu em như là hoa ở trên cành\nBao nhiêu người thương cũng chẳng đành\nRồi buổi chiều hôm ấy chợt em đi mất\n\nTôi mang thầm thương viết cho em\nEm chưa đọc xong vứt quanh nhà\nVì em cũng biết tôi chẳng thể nào mà có em\n\nCho dù em biết anh yêu em nhưng thôi em vẫn cứ lặng thinh\nBao chuyện cỏn con, phai nhạt màu son, lem hết mi\n\nYêu thì yêu không yêu thì thôi dù sao cũng cách xa\nLỡ mai em đi về xa vời, có chăng đây chỉ còn lại mình anh?\n\nPhải chi anh đoán ra khi em ngang qua đây ngào ngạt mùi hương nước hoa\nGiày cao gót thướt tha đưa em đi qua bao nhiêu chuyện tình yêu thoáng qua" },
+      { title: "04. A Tension Lover", src: "https://drive.google.com/uc?id=1mWBLQYPvA31RsDSouyUdX-4r_YHzhos7&export=download", lyrics: "We’ve been down this road\nAnd it’s getting old\nI don't wanna waste your time so please, listen\n\nI tested the flame\nAnd yes, I’m telling you\nWe’ve made up our minds since the last time\n\nSo don’t lay the wreck at my front door\nI know it hurts so good\n‘Cause I’ve experienced it before\n\nWhat we loved was the tension\nI let you stay the nights in my room\nBut I don’t want you to be mine\nI don’t want your attention\n\nI’m not the one to love\nYou don’t deserve to be alone\nGuess I should walk away from your life\n\nYou don’t have to stay\nI’ll find a way to fade away\nYou know it’s time that you decided\n\nWe made up our minds the last time\nSo you shouldn’t say it was my fault\nI can’t take the blame ‘cause you already knew that\n\nThe burns gonna be alright\nI know it hurts so good\n‘Cause I’ve experienced it before\n\nWhat we loved was the tension\nI let you stay the nights in my room\nBut I don’t want you to be mine\nI don’t want your attention" }
     ];
 
     const player = document.getElementById('audioPlayer');
+    const albumArt = document.getElementById('albumArt');
     const trackList = document.getElementById('tracks');
+    const lyricsDisplay = document.getElementById('lyricsDisplay');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+
     let currentTrack = 0;
 
     tracks.forEach((track, index) => {
@@ -91,21 +244,73 @@
     function playTrack(index) {
       currentTrack = index;
       player.src = tracks[index].src;
-      player.play();
       
+      albumArt.style.transform = 'scale(0.95)';
+      lyricsDisplay.style.opacity = '0';
+
+      setTimeout(() => {
+        player.play();
+        albumArt.style.transform = 'scale(1.05)';
+        lyricsDisplay.style.opacity = '1';
+      }, 150);
+
       document.querySelectorAll('.track').forEach((el, i) => {
         el.classList.toggle('playing', i === index);
       });
+
+      lyricsDisplay.textContent = tracks[index].lyrics;
     }
 
-    player.addEventListener('ended', () => {
-      currentTrack = (currentTrack + 1) % tracks.length;
-      playTrack(currentTrack);
+    function togglePlay() {
+      if (player.paused) {
+        player.play();
+        playPauseBtn.textContent = '❚❚';
+      } else {
+        player.pause();
+        playPauseBtn.textContent = '▶';
+      }
+    }
+
+    function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; playTrack(currentTrack); }
+    function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; playTrack(currentTrack); }
+
+    player.addEventListener('timeupdate', () => {
+      if (player.duration) {
+        progressBar.value = (player.currentTime / player.duration) * 100;
+        currentTimeEl.textContent = formatTime(player.currentTime);
+        durationEl.textContent = formatTime(player.duration);
+      }
     });
+
+    progressBar.addEventListener('click', (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      player.currentTime = pos * player.duration;
+    });
+
+    player.addEventListener('ended', nextTrack);
+
+    volumeSlider.addEventListener('input', () => {
+      player.volume = volumeSlider.value;
+    });
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isLight = body.getAttribute('data-theme') === 'light';
+      body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
+    }
 
     window.onload = () => {
       playTrack(0);
       player.pause();
+      playPauseBtn.textContent = '▶';
     };
   </script>
 </body>
